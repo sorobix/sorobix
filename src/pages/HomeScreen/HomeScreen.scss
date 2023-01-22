@@ -1,0 +1,12 @@
+.homescreen{
+    @apply w-full bg-slate-900 h-screen;
+    &_header{
+        @apply px-6 flex;
+        &_logo{
+            &_image{
+                @apply w-36 ;
+
+            }
+        }
+    }
+}
