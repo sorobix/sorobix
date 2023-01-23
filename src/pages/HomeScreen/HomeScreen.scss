@@ -1,12 +1,136 @@
-.homescreen{
-    @apply w-full bg-slate-900 h-screen;
-    &_header{
-        @apply px-6 flex;
-        &_logo{
-            &_image{
-                @apply w-36 ;
-
-            }
-        }
+.homescreen {
+  @apply min-h-screen px-12;
+  background-color: #151515;
+  &_header {
+    @apply px-6 py-3 flex;
+    &_logo {
+      &_image {
+        @apply w-40;
+      }
     }
+  }
+  &_maincontainer {
+    @apply flex flex-col lg:flex-row pt-4 gap-10;
+
+    &_left {
+      @apply flex flex-col;
+      width: 50vw;
+     
+      &_inputcontainer {
+        &_title {
+          @apply text-white text-xl font-semibold py-4;
+        }
+      }
+      &_outputcontainer {
+        @apply pt-6;
+        &_title {
+          @apply text-white text-xl font-semibold pb-4;
+        }
+        &_text {
+          @apply py-3 text-white pl-4;
+          background-color: #282c34;
+          min-width: 100%;
+          height: 200px;
+          border-radius: 16px;
+          overflow: auto;
+          white-space: pre-wrap;
+        }
+      }
+      &_buttoncontainer {
+        @apply flex flex-row pt-6;
+        &_compile {
+          @apply rounded-lg text-white text-lg px-8 py-3 mr-4 cursor-pointer font-semibold;
+          background-color: #282c34;
+        }
+        &_deploy {
+          @apply rounded-lg text-white text-lg px-8 py-3 mr-4 cursor-pointer font-semibold;
+          background-color: #4175ba;
+        }
+      }
+    }
+    &_right {
+      @apply flex flex-col;
+      width: 30vw;
+      &_title {
+        @apply text-white text-xl font-semibold py-4;
+      }
+      &_contractaddresscontainer {
+        @apply flex flex-row rounded-2xl py-3 px-4 justify-between;
+        background-color: #282c34;
+
+        &_input {
+          border: none;
+          background-color: inherit;
+          outline: none;
+          width: 70%;
+          color: #c3c3c3;
+          font-size: 20px;
+          font-weight: 500;
+          border-bottom: 1px solid gray;
+        }
+        &_button {
+          @apply bg-white px-2 py-2 rounded-lg font-semibold;
+        }
+      }
+      &_functioncontainer {
+        @apply flex flex-col rounded-2xl py-4 px-4 justify-between mt-4;
+        background-color: #282c34;
+        &_title {
+          @apply text-white pb-4;
+          font-size: 18px;
+        }
+        &_input {
+          border: none;
+          background-color: inherit;
+          outline: none;
+          width: 70%;
+          color: #c3c3c3;
+          font-size: 20px;
+          border-bottom: 1px solid gray;
+        }
+        &_property {
+          @apply flex flex-row pt-6 justify-between;
+          font-size: 18px;
+          color: white;
+        }
+        &_buttoncontainer {
+          @apply flex flex-row justify-end;
+          &_text {
+            @apply mt-2 py-3 px-6 text-white rounded-xl font-semibold cursor-pointer;
+            background-color: #4175ba;
+          }
+        }
+        &_output {
+          @apply px-4 py-4 rounded-2xl mt-6;
+          background-color: #181b1f;
+          &_title {
+            @apply text-white font-semibold;
+            font-size: 20px;
+          }
+          &_text {
+            @apply py-3 text-white;
+
+            height: 150px;
+            overflow: scroll;
+            white-space: pre-wrap;
+          }
+        }
+      }
+    }
+  }
+}
+.cm-scroller,
+.cm-editor {
+  border-radius: 16px !important;
+}
+@media only screen and (max-width: 1023px) {
+  .homescreen_maincontainer_left {
+    width: 80vw;
+  }
+  .homescreen_maincontainer_right {
+    width: 80vw;
+    margin-bottom: 20px;
+  }
+
+  
 }
