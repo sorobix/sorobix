@@ -1,70 +1,44 @@
-# Getting Started with Create React App
+# Sorobix
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<p align="center">
+  <a href="https://github.com/rishabhkeshan/sorobix">
+    <img src="./src/assets/Sorobix_Logo.svg" alt="Logo" width="380" height="190">
+  </a>
+</p>
 
-## Available Scripts
+> Online IDE to compile, deploy, and invoke Soroban Smart Contracts on-the-fly on the Stellar network
 
-In the project directory, you can run:
+## How it works
 
-### `npm start`
+Sorobix provides the user an IDE on the cloud freely accessible to access and interact with the Smart Contracts on Soroban. We provide in-house support for
+- Account Creation on FutureNet
+- Faucet Money Deposits via FriendBot
+- Compiling Rust smart contracts on the web
+- Deploying these smart contracts on the Futurenet
+- Invoking existing deployed smart contracts using their Contract ID
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+We beleive this will take the Soroban Smart Contracts to new horizons as the community can now try out Soroban on-to-go with 0 local setup! With endless possibilites of integrating this in the existing ecosystem, for example, integrating these with our official Soroban documentation, and many more, we aim to take Sorobix and Soroban hand-in-hand to newer heights!
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+![arch](assets/arch.jpeg)
 
-### `npm test`
+## Tech Stack
+- Python
+- Shell
+- ReactJS
+- FastAPI
+- FutureNet
+- Soroban Tools
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+## Local Setup
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Clone this repo using `git clone https://github.com/rishabhkeshan/sorobix`
+2. Install the dependencies using `npm install`
+3. Start the project locally by `npm start`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## License
 
-### `npm run eject`
+Licensed under MIT License : https://opensource.org/licenses/MIT
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+<p align="center">Made with ❤ by Team Gavakshi</p>
