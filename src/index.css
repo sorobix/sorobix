@@ -11,3 +11,19 @@ code {
   font-family: 'JetBrains Mono', monospace;
   color: #ffffff;
 }
+::-webkit-scrollbar {
+  width: 2px;
+  height: 0px;
+}
+::-webkit-scrollbar-track {
+  background: #000000; 
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(255, 255, 255); 
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(189, 189, 189); 
+}
+.markdown > * {
+  all: revert;
+}

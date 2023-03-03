@@ -1,22 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./IDEScreen.scss";
 import CodeMirror from "@uiw/react-codemirror";
 import { rust } from "@codemirror/lang-rust";
 import Acc1 from "../../assets/account1pfp.svg";
-import TextField from "@mui/material/TextField";
 import plus from "../../assets/plus.svg";
 import Api from "../../utils/api";
 import { useSnackbar } from "notistack";
+import Sorobix from "../../assets/Sorobix_Logo.svg";
 import Loader from "../../components/Loader/Loader";
 import DropDown from "./DropDown/DropDown";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ReactMarkdown from "react-markdown";
 
 export default function IDEScreen() {
-  const [sortBy, setSortBy] = useState("Account 1");
-  const [functionKeys, setFunctionKeys] = useState(["","","",""]);
-    const [functionValues, setFunctionValues] = useState(["","","","",""]);
+  const [accountID, setAccountID] = useState(0);
+  const [functionKeys, setFunctionKeys] = useState(["", "", ""]);
+  const [functionValues, setFunctionValues] = useState(["", "", "", ""]);
   const [funcState, setFuncState] = useState("about");
   const [contractAddress, setContractAddress] = useState("");
   const [functionName, setFunctionName] = useState("");
+  const [GSKeys, setGSKeys] = useState([
+    { G: "", S: "" },
+    { G: "", S: "" },
+    { G: "", S: "" },
+  ]);
+  const [compileSuccess, setCompileSuccess] = useState(false);
+  const [invokeSuccess, setInvokeSuccess] = useState(false);
+  const [showLoading, setShowLoading] = useState(false);
+  const [output, setOutput] = useState("");
+  const [results, setResults] = useState(
+    "sdsd dsdwwdwdw wdwwddwdwdwswswswwsswswsw"
+  );
+
   const [code, setCode] = useState(`#![no_std]
 use soroban_sdk::{contractimpl, symbol, vec, Env, Symbol, Vec};
 
@@ -31,12 +47,140 @@ impl Contract {
   const onChange = React.useCallback((value, viewUpdate) => {
     setCode(value);
   }, []);
+  const showErrorSnack = (message, id) => {
+    toast.update(id, {
+      render: message,
+      type: "error",
+      isLoading: false,
+      closeButton: true,
+      autoClose: 2500,
+      pauseOnFocusLoss: false,
+      delay: 50,
+    });
+  };
+  const showSuccessSnack = (message, id) => {
+    toast.update(id, {
+      render: message,
+      type: "success",
+      isLoading: false,
+      closeButton: true,
+      autoClose: 2500,
+      pauseOnFocusLoss: false,
+      delay: 50,
+    });
+  };
+  const toastId = useRef(null);
+  const api = new Api();
+
+  useEffect(() => {
+    if (localStorage.getItem("GSKeys"))
+      setGSKeys(JSON.parse(localStorage.getItem("GSKeys")));
+  }, []);
+  useEffect(() => {
+    localStorage.setItem("GSKeys", JSON.stringify(GSKeys));
+  }, [GSKeys]);
+
+  const onGenerate = async () => {
+    toastId.current = toast.loading("Generating G/S Keys...");
+    const res = await api.generateKey();
+    if (res.success) {
+      setGSKeys(
+        GSKeys.map((el, i) =>
+          i === accountID
+            ? {
+                G: res.pub_key,
+                S: res.secret_seed,
+              }
+            : el
+        )
+      );
+    }
+    showSuccessSnack("G/S keys generated!", toastId.current);
+    console.log("eee");
+  };
+  const tryCompile = async () => {
+    toastId.current = toast.loading("Compiling Contract...");
+    setShowLoading(true);
+    setCompileSuccess(false);
+    setOutput("");
+    const data = { lib_file: code };
+    const res = await api.compileContract(data);
+    console.log(res);
+    setShowLoading(false);
+
+    if (res.success) {
+      setCompileSuccess(true);
+      showSuccessSnack("Compilation Successful", toastId.current);
+      setOutput(res.message);
+    } else {
+      setOutput(res?.message);
+      showErrorSnack("Compilation Failed!", toastId.current);
+    }
+  };
+  const tryDeploy = async () => {
+    toastId.current = toast.loading("Deploying Contract...");
+    setShowLoading(true);
+
+    setCompileSuccess(false);
+    setOutput("");
+    const data = { lib_file: code, secret_key: GSKeys[accountID].S };
+    const res = await api.deployContract(data);
+    console.log(res.message);
+    setShowLoading(false);
+
+    if (res.success) {
+      setCompileSuccess(true);
+      showSuccessSnack("Contract Successfully Deployed!", toastId.current);
+      // showSuccessSnack(res?.contract_id);
+      setOutput(`contract_id: ${res?.contract_id}message: ${res?.message}`);
+    } else {
+      setOutput(res?.message);
+      showErrorSnack("Contract Deployment Failed!", toastId.current);
+    }
+  };
+  const interleaveArgs = (array1, array2) =>
+    array1
+      .concat(array2)
+      .filter((x) => x)
+      .flatMap((x, i) => [x, array2[i]])
+      .slice(0, array1.length + array2.length - 1);
+  const tryInvoke = async () => {
+    toastId.current = toast.loading("Invoking Contract...");
+
+    setShowLoading(true);
+    setInvokeSuccess(false);
+    setResults("");
+    const data = {
+      contract_id: contractAddress,
+      contract_function: functionName,
+      secret_key: GSKeys[accountID].S,
+      contract_arguments: interleaveArgs(functionKeys, functionValues),
+    };
+    const res = await api.invokeContract(data);
+    console.log(res?.results);
+    setShowLoading(false);
+
+    if (res.success) {
+      setInvokeSuccess(true);
+      // showSuccessSnack("Success");
+      setResults(`message: ${res?.results}`);
+    }
+  };
   return (
     <article className="IDEScreen">
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        rtl={false}
+        draggable
+        theme="dark"
+      />
       <section className="IDEScreen_maincontainer">
         <div className="IDEScreen_maincontainer_sidebar">
           <div className="IDEScreen_header">
-            <div className="IDEScreen_header_logo">SOROBIX IDE</div>
+            <div className="IDEScreen_header_logo"><img height={"100px"} src={Sorobix} alt="sorobix"/></div>
           </div>
           <div className="IDEScreen_maincontainer_sidebar_outercontainer">
             <div className="IDEScreen_maincontainer_sidebar_outercontainer_topcontainer">
@@ -64,8 +208,31 @@ impl Contract {
               </div>
               {funcState === "about" && (
                 <div className="IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_aboutcontainer">
-                  Sorobix is your beginner friendly playground to try out
-                  Soroban contracts on the fly.
+                  <ReactMarkdown escapeHtml={false}>{`# Sorobix IDE
+
+Welcome to Sorobix IDE, where you can write/deploy and invoke contracts on the Stellar Blockchain using soroban!
+
+## Quickstart
+
+### Import or Generate G/S Keys
+
+Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. However if you do not have a G/S key, you can generate one automatically!
+
+1. On the bottom left panel, you can add your own G/S keys in the Input Field
+2. Incase, you do not have a G/S Key pair, you can generate one using the \`Generate G/S Keys\` buttons and the Key Pair will be auto-filled!
+   
+### Compile and Deploy Contract on Stellar Blockchain
+
+1. Code your contract on the right panel (We already have the \`Hello World\` contract ready for you)
+2. Click on the \`\`\`Compile\`\`\` Button in the bottom left corner of your screen, this will compile your contract
+3. To deploy your contract on the Stellar Blockchain, ensure you have the right G/S KeyPair and click on \`Deploy Contract\` !
+
+### Invoke a Function of a deployed contract
+
+1. Click on the \`Functions\` tab above
+2. Input the required fields such as contract address, function name and parameteres
+3. Ensure you have the right G/S keys set in the left-bottom panel
+4. Click on \`Invoke Contract\` button to invoke the contract on-chain!`}</ReactMarkdown>
                 </div>
               )}
               {funcState === "function" && (
@@ -104,13 +271,13 @@ impl Contract {
                     <div className="IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_functioncontainer_inputbox_title">
                       <div>Function Parameters</div>
                       <div
-                      className="pointer"
+                        className="pointer"
                         onClick={() => {
                           setFunctionKeys([...functionKeys, ""]);
-                          setFunctionValues([...functionValues,""]);
+                          setFunctionValues([...functionValues, ""]);
                         }}
                       >
-                        <img className="pointer" src={plus} alt="plus icon"/>
+                        <img className="pointer" src={plus} alt="plus icon" />
                       </div>
                     </div>
                     <div className="IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_functioncontainer_inputbox_table">
@@ -161,7 +328,22 @@ impl Contract {
                     </div>
                   </div>
 
-                  <div className="IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_functioncontainer_invokebutton">
+                  <div
+                    style={{
+                      opacity:
+                        (functionName !== "" && contractAddress !== "") ||
+                        showLoading
+                          ? "100%"
+                          : "50%",
+                      pointerEvents:
+                        (functionName !== "" && contractAddress !== "") ||
+                        showLoading
+                          ? "auto"
+                          : "none",
+                    }}
+                    onClick={tryInvoke}
+                    className="IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_functioncontainer_invokebutton"
+                  >
                     Invoke Contract
                   </div>
                   {/* <div className="IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_functioncontainer"></div> */}
@@ -173,20 +355,14 @@ impl Contract {
                 Execution Center
               </div>
               <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer">
-                {/* <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_accountscontainer">
-                  <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_accountscontainer_image">
-                    <img src={Acc1} alt="account" />
-                  </div>
-                  <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_accountscontainer_separator"></div>
-                  <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_accountscontainer_accountname">
-                    Account 1
-                  </div>
-                </div> */}
                 <div className="w-full">
-                  <DropDown sortBy={sortBy} setSortBy={setSortBy} />
+                  <DropDown accountID={accountID} setAccountID={setAccountID} />
                 </div>
                 <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_generatecontainer">
-                  <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_generatecontainer_generatebutton">
+                  <div
+                    onClick={onGenerate}
+                    className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_generatecontainer_generatebutton"
+                  >
                     Generate G/S Keys
                   </div>
                 </div>
@@ -201,7 +377,24 @@ impl Contract {
                     id="gvalue"
                     className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_keycontainer_value"
                   >
-                    GDHMW6QZOL73SHKG2JA3YHXFDS5ZRW....
+                    <input
+                      className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_keycontainer_value_input"
+                      value={GSKeys[accountID].G}
+                      onChange={(e) => {
+                        // console.log(accountID,"aid");
+                        // console.log(GSKeys);
+                        setGSKeys(
+                          GSKeys.map((el, i) =>
+                            i === accountID
+                              ? {
+                                  G: e.target.value,
+                                  S: el.S,
+                                }
+                              : el
+                          )
+                        );
+                      }}
+                    />
                   </div>
                   <div
                     id="skey"
@@ -213,14 +406,47 @@ impl Contract {
                     id="svalue"
                     className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_keycontainer_value"
                   >
-                    GDHMW6QZOL73SHKG2JA3YHXFDSS5ZRW....
+                    <input
+                      className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_keycontainer_value_input"
+                      value={GSKeys[accountID].S}
+                      onChange={(e) => {
+                        // console.log(accountID,"aid");
+                        console.log(GSKeys);
+                        setGSKeys(
+                          GSKeys.map((el, i) =>
+                            i === accountID
+                              ? {
+                                  G: el.G,
+                                  S: e.target.value,
+                                }
+                              : el
+                          )
+                        );
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_buttonscontainer">
-                  <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_buttonscontainer_compile">
+                  <div
+                    onClick={tryCompile}
+                    style={{
+                      opacity: !showLoading ? "100%" : "50%",
+                      pointerEvents: !showLoading ? "auto" : "none",
+                    }}
+                    className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_buttonscontainer_compile"
+                  >
                     Compile Contract
                   </div>
-                  <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_buttonscontainer_deploy">
+                  <div
+                    onClick={tryDeploy}
+                    style={{
+                      opacity:
+                        !showLoading && GSKeys[accountID].S ? "100%" : "50%",
+                      pointerEvents:
+                        !showLoading && GSKeys[accountID].S ? "auto" : "none",
+                    }}
+                    className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_buttonscontainer_deploy"
+                  >
                     Deploy Contract
                   </div>
                 </div>
@@ -242,7 +468,9 @@ impl Contract {
             <div className="IDEScreen_maincontainer_innercontainer_outputcontainer_titlecontainer">
               Output
             </div>
-            <div className="IDEScreen_maincontainer_innercontainer_outputcontainer_textcontainer">{`>`}</div>
+            <div className="IDEScreen_maincontainer_innercontainer_outputcontainer_textcontainer">
+              {output}
+            </div>
           </div>
         </div>
       </section>

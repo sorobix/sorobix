@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./DropDown.scss";
 import Acc1 from "../../../assets/account1pfp.svg";
 
-function DropDown({sortBy, setSortBy}) {
+function DropDown({accountID, setAccountID}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -17,11 +17,11 @@ function DropDown({sortBy, setSortBy}) {
           </div>
           <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_accountscontainer_separator"></div>
           <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_accountscontainer_accountname">
-            {sortBy}
+            {accountID===0?"Account 1":accountID===1?"Account 2":"Account 3"}
           </div>
         </div>
         {/* <span className="mr-4">
-          {sortBy === "inProgress" ? "In Progress" : sortBy}
+          {accountID === "inProgress" ? "In Progress" : accountID}
         </span> */}
 
         <svg
@@ -44,7 +44,7 @@ function DropDown({sortBy, setSortBy}) {
           <p
             className="option"
             onClick={() => {
-              setSortBy("Account 1");
+              setAccountID(0);
               setOpen(false);
             }}
           >
@@ -53,7 +53,7 @@ function DropDown({sortBy, setSortBy}) {
           <p
             className="option"
             onClick={() => {
-              setSortBy("Account 2");
+              setAccountID(1);
               setOpen(false);
             }}
           >
@@ -62,7 +62,7 @@ function DropDown({sortBy, setSortBy}) {
           <p
             className="option"
             onClick={() => {
-              setSortBy("Account 3");
+              setAccountID(2);
               setOpen(false);
             }}
           >
