@@ -1,56 +1,245 @@
 .IDEScreen {
   @apply m-0 h-screen w-screen flex flex-col;
-  background-color: #151515;
+  background-color: #000000;
   &_header {
-    @apply px-6 flex items-center;
-    height: 8vh;
-    border: 1px solid #ffffff;
+    @apply flex items-center justify-center;
+    height: 10vh;
+    // border: 1px solid #ffffff;
     &_logo {
-      &_image {
-        @apply w-32;
-      }
+      @apply font-bold text-4xl;
     }
   }
   &_maincontainer {
     @apply flex flex-row;
-    height: 92vh;
+    height: 100vh;
+    gap: 12px;
     &_sidebar {
-      border: 1px solid #ffffff;
-      width: 15vw;
+      //   border: 1px solid #ffffff;
+      width: 20vw;
 
       @apply flex flex-col;
-      &_maincontainer{
-        @apply flex flex-col p-4;
-        &_title{
-            @apply text-lg font-bold text-zinc-50;
+      &_outercontainer {
+        @apply flex flex-col;
+        height: 100%;
+        &_title {
+          @apply text-lg font-bold text-zinc-50;
         }
-        &_text{
-            @apply text-sm mt-4 font-bold text-zinc-500;
+        &_text {
+          @apply text-sm mt-4 font-bold text-zinc-500;
+        }
+        &_topcontainer {
+          //   background-color: #1c1b1f;
+          @apply flex flex-col py-4;
+          gap: 2px;
+          &_bar {
+            @apply flex flex-row;
+            gap: 1px;
+            background-color: #000000;
+            &_left {
+              background-color: #1c1b1f;
+              width: 50%;
+              @apply flex justify-center items-center py-1.5 cursor-pointer;
+              &:hover {
+                background-color: #302d38;
+              }
+            }
+            &_right {
+              width: 50%;
+              background-color: #1c1b1f;
+              @apply flex justify-center items-center py-1.5 cursor-pointer;
+              &:hover {
+                background-color: #302d38;
+              }
+            }
+          }
+          &_aboutcontainer {
+            background-color: #1c1b1f;
+            @apply px-4 py-4 text-xs;
+            height: 36vh;
+            overflow: auto;
+          }
+          &_functioncontainer {
+            background-color: #1c1b1f;
+            @apply px-4 py-4 text-xs flex flex-col;
+            // width: 100%;
+            height: 36vh;
+            overflow: auto;
+            &_inputbox {
+              @apply flex flex-col mb-4;
+              width: 100%;
+              &_title {
+                @apply text-sm flex flex-row justify-between items-center;
+              }
+              &_value {
+                @apply flex mt-2;
 
+                background: #302d38;
+                border-radius: 8px;
+                &_input {
+                  @apply w-full bg-inherit px-2 py-2;
+                  border-radius: 8px;
+                  color: white;
+                  border: none;
+                  outline: none;
+                  font: inherit;
+                  &::placeholder {
+                    color: rgba(255, 255, 255, 0.75);
+                  }
+                }
+              }
+              &_table {
+                @apply flex flex-col mt-2;
+                width: 100%;
+                gap: 2px;
+                &_height {
+                  @apply flex flex-col;
+                  gap: 2px;
+                  max-height: 70px;
+                  overflow: scroll;
+                  -ms-overflow-style: none; /* Internet Explorer 10+ */
+                  scrollbar-width: none; /* Firefox */
+                  &::-webkit-scrollbar {
+                    display: none;
+                  }
+                }
+                &_row {
+                  @apply flex flex-row;
+                  gap: 1px;
+                  &_l {
+                    @apply flex justify-center;
+                    background-color: #302d38;
+                    width: 50%;
+                    &_input {
+                      @apply w-full bg-inherit;
+                      border-radius: 8px;
+                      color: white;
+                      border: none;
+                      outline: none;
+                      font: inherit;
+                      text-align: center;
+                    }
+                  }
+                  &_r {
+                    @apply flex justify-center;
+                    background-color: #302d38;
+                    width: 50%;
+                    &_input {
+                      @apply w-full bg-inherit;
+                      border-radius: 8px;
+                      color: white;
+                      border: none;
+                      outline: none;
+                      font: inherit;
+                      text-align: center;
+                    }
+                  }
+                }
+              }
+            }
+            &_invokebutton {
+              @apply flex justify-center items-center px-4 py-3 text-sm cursor-pointer;
+              background: #d0bcff;
+              box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+              border-radius: 8px;
+              color: #381e72;
+            }
+          }
+        }
+        &_bottomcontainer {
+          @apply flex flex-col;
+          // margin-top: 12px;
+          height: 100%;
+          gap: 2px;
+          &_bar {
+            background-color: #1c1b1f;
+
+            @apply flex justify-center py-1.5;
+          }
+          &_executecontainer {
+            @apply flex flex-col px-4 pt-8;
+            height: 100%;
+            background-color: #1c1b1f;
+            &_accountscontainer {
+              @apply flex flex-row rounded-lg items-center;
+              height: 50px;
+              width: 100%;
+              background-color: #302d38;
+              &_image {
+                @apply px-5 flex justify-center items-center;
+              }
+              &_separator {
+                width: 2px;
+                // height: 100%;
+                background-color: #000000;
+                @apply mr-4;
+              }
+            }
+            &_generatecontainer {
+              @apply flex justify-end py-2;
+              &_generatebutton {
+                @apply text-sm rounded-lg px-2 py-3 cursor-pointer;
+                background-color: #d0bcff;
+                color: #381e72;
+              }
+            }
+            &_keycontainer {
+              @apply flex flex-col;
+              &_title {
+                @apply mt-4 ml-1;
+              }
+              &_value {
+                background: #302d38;
+                @apply rounded-lg px-2.5 py-1.5 text-sm mt-1;
+              }
+            }
+            &_buttonscontainer {
+              @apply flex flex-row py-6;
+              gap: 8px;
+              &_compile {
+                @apply flex justify-center items-center px-4 py-3 text-sm cursor-pointer;
+                width: 50%;
+                background: #d0bcff;
+                box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+                border-radius: 8px;
+                color: #381e72;
+              }
+              &_deploy {
+                @apply flex justify-center items-center px-4 py-3 text-sm cursor-pointer;
+                width: 50%;
+                background: #d0bcff;
+                box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+                border-radius: 8px;
+                color: #381e72;
+              }
+            }
+          }
         }
       }
-
     }
     &_innercontainer {
       @apply flex flex-col;
-      width: 85vw;
+      width: 80vw;
+      gap: 12px;
+      //   padding-left: 12px;
       &_codecontainer {
         // border: 2px solid #0f9d35;
         height: 100%;
+        overflow: auto;
         &_codearea {
           height: 100%;
         }
       }
       &_outputcontainer {
         // border: 2px solid #0f2b9d;
-        height: 20vh;
-        @apply flex flex-col px-4 py-2;
-        &_title{
-            @apply text-base font-bold text-zinc-50;
+        height: 35vh;
+        background-color: #1c1b1f;
+        @apply flex flex-col;
+        &_titlecontainer {
+          @apply text-base font-bold py-2 justify-center flex;
+          border-bottom: 1px solid black;
         }
-        &_text{
-            @apply text-sm font-bold text-zinc-500;
-
+        &_textcontainer {
+          @apply text-sm px-4 py-2 font-bold text-zinc-500;
         }
       }
     }
@@ -63,9 +252,19 @@
 .cm-editor {
   height: 100%;
   width: 100%;
+  background-color: #1c1b1f !important;
+}
+.cm-gutters {
+  background-color: #1c1b1f !important;
 }
 .cm-scroller {
   overflow: auto;
+}
+.activeBG {
+  background-color: #302d38;
+}
+.pointer{
+    cursor: pointer;
 }
 // @media only screen and (max-width: 1023px) {
 //   .homescreen_maincontainer_left {

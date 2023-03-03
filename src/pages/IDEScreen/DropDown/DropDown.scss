@@ -1,0 +1,22 @@
+.dropdown-button {
+                @apply flex flex-row rounded-lg items-center justify-between cursor-pointer;
+                height: 50px;
+                width: 100%;
+                    background-color: #302D38;
+                    color: white;
+
+}
+.dropdown-modal{
+  @apply absolute py-2 mt-2 divide-y divide-gray-600 rounded-md shadow-xl w-40 ;
+  width: calc(18vw + 4px);
+  background-color: #302D38;
+}
+.option {
+  @apply block px-4 text-left py-2 w-11/12 hover:text-white cursor-pointer;
+}
+.dropdown-inner{
+  @apply flex;
+}
+.dropdown-icon{
+  @apply py-3;
+}
