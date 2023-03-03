@@ -1,0 +1,79 @@
+.IDEScreen {
+  @apply m-0 h-screen w-screen flex flex-col;
+  background-color: #151515;
+  &_header {
+    @apply px-6 flex items-center;
+    height: 8vh;
+    border: 1px solid #ffffff;
+    &_logo {
+      &_image {
+        @apply w-32;
+      }
+    }
+  }
+  &_maincontainer {
+    @apply flex flex-row;
+    height: 92vh;
+    &_sidebar {
+      border: 1px solid #ffffff;
+      width: 15vw;
+
+      @apply flex flex-col;
+      &_maincontainer{
+        @apply flex flex-col p-4;
+        &_title{
+            @apply text-lg font-bold text-zinc-50;
+        }
+        &_text{
+            @apply text-sm mt-4 font-bold text-zinc-500;
+
+        }
+      }
+
+    }
+    &_innercontainer {
+      @apply flex flex-col;
+      width: 85vw;
+      &_codecontainer {
+        // border: 2px solid #0f9d35;
+        height: 100%;
+        &_codearea {
+          height: 100%;
+        }
+      }
+      &_outputcontainer {
+        // border: 2px solid #0f2b9d;
+        height: 20vh;
+        @apply flex flex-col px-4 py-2;
+        &_title{
+            @apply text-base font-bold text-zinc-50;
+        }
+        &_text{
+            @apply text-sm font-bold text-zinc-500;
+
+        }
+      }
+    }
+  }
+}
+// .cm-scroller,
+// .cm-editor {
+//   border-radius: 16px !important;
+// }
+.cm-editor {
+  height: 100%;
+  width: 100%;
+}
+.cm-scroller {
+  overflow: auto;
+}
+// @media only screen and (max-width: 1023px) {
+//   .homescreen_maincontainer_left {
+//     width: 80vw;
+//   }
+//   .homescreen_maincontainer_right {
+//     width: 80vw;
+//     margin-bottom: 20px;
+//   }
+
+// }
