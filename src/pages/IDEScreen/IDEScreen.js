@@ -144,6 +144,7 @@ impl Contract {
       .filter((x) => x)
       .flatMap((x, i) => [x, array2[i]])
       .slice(0, array1.length + array2.length - 1);
+
   const tryInvoke = async () => {
     toastId.current = toast.loading("Invoking Contract...");
 
@@ -162,8 +163,11 @@ impl Contract {
 
     if (res.success) {
       setInvokeSuccess(true);
-      // showSuccessSnack("Success");
+      showSuccessSnack("Success", toastId.current);
       setResults(`message: ${res?.results}`);
+    }
+    else{
+        showErrorSnack("Invoke Failed", toastId.current);
     }
   };
   return (
