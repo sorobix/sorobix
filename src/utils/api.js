@@ -20,6 +20,19 @@ export default class Api {
       return err.response.data;
     }
   }
+  async formatCode(data){
+        try {
+          const resp = await Axios({
+            method: "post",
+            url: `https://sorobixfmt.eastus.cloudapp.azure.com/`,
+            data,
+          });
+          console.log(resp);
+          return resp;
+        } catch (err) {
+          return err.response;
+        }
+  }
 
   async deployContract(data) {
     try {

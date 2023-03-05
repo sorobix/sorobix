@@ -20,6 +20,31 @@ export default function IDEScreen() {
   const [funcState, setFuncState] = useState("about");
   const [contractAddress, setContractAddress] = useState("");
   const [functionName, setFunctionName] = useState("");
+  const about = `# Sorobix IDE
+
+Welcome to Sorobix IDE, where you can write/deploy and invoke contracts on the Stellar Blockchain using Soroban!
+
+## Quickstart
+
+### Import or Generate G/S Keys
+
+Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. However if you do not have a G/S key, you can generate one automatically!
+
+1. On the bottom left panel, you can add your own G/S keys in the Input Field
+2. Incase, you do not have a G/S Key pair, you can generate one using the \`Generate G/S Keys\` button and the Key Pair will be auto-filled!
+   
+### Compile and Deploy Contract on Stellar Blockchain
+
+1. Code your contract on the right panel (We already have the \`Hello World\` contract ready for you)
+2. Click on the \`\`\`Compile\`\`\` Button in the bottom left corner of your screen, this will compile your contract
+3. To deploy your contract on the Stellar Blockchain, ensure you have the right G/S KeyPair and click on \`Deploy Contract\` !
+
+### Invoke a Function of a deployed contract
+
+1. Click on the \`Functions\` tab above
+2. Input the required fields such as contract address, function name and parameteres
+3. Ensure you have the right G/S keys set in the left-bottom panel
+4. Click on \`Invoke Contract\` button to invoke the contract on-chain!`;
   const [GSKeys, setGSKeys] = useState([
     { G: "", S: "" },
     { G: "", S: "" },
@@ -80,6 +105,26 @@ impl Contract {
     localStorage.setItem("GSKeys", JSON.stringify(GSKeys));
   }, [GSKeys]);
 
+  const tryFormat = async () => {
+    toastId.current = toast.loading("Formatting code...");
+    setShowLoading(true);
+    const encodedCode = btoa(code);
+    const data = {
+      code: encodedCode,
+    };
+    const res = await api.formatCode(data);
+    console.log(res);
+    if (res.status === 200) {
+      showSuccessSnack("Code Formatted!!!", toastId.current);
+      const decodedCode = atob(res.data.formatted_code);
+      setCode(decodedCode);
+    } else {
+      if (res?.status === 406) {
+        showErrorSnack("Syntax Error!", toastId.current);
+      } else showErrorSnack("Something went wrong!", toastId.current);
+    }
+  };
+
   const onGenerate = async () => {
     toastId.current = toast.loading("Generating G/S Keys...");
     const res = await api.generateKey();
@@ -138,12 +183,22 @@ impl Contract {
       showErrorSnack("Contract Deployment Failed!", toastId.current);
     }
   };
-  const interleaveArgs = (array1, array2) =>
-    array1
-      .concat(array2)
-      .filter((x) => x)
-      .flatMap((x, i) => [x, array2[i]])
-      .slice(0, array1.length + array2.length - 1);
+//   const interleaveArgs = (array1, array2) =>
+//     array1
+//       .concat(array2)
+//       .filter((x) => x)
+//       .flatMap((x, i) => [x, array2[i]])
+//       .slice(0, array1.length + array2.length - 1);
+const interleaveArgs = (array1,array2) =>{
+    const mergedArr = [];
+    array1.forEach((val,i)=>{
+        if(val!=="")
+        mergedArr.push(val);
+        if(array2[i]!=="")
+        mergedArr.push(array2[i]);
+    });
+    return mergedArr;
+}
 
   const tryInvoke = async () => {
     toastId.current = toast.loading("Invoking Contract...");
@@ -164,10 +219,9 @@ impl Contract {
     if (res.success) {
       setInvokeSuccess(true);
       showSuccessSnack("Success", toastId.current);
-      setResults(`message: ${res?.results}`);
-    }
-    else{
-        showErrorSnack("Invoke Failed", toastId.current);
+      setOutput(`message: ${res?.results}`);
+    } else {
+      showErrorSnack("Invoke Failed", toastId.current);
     }
   };
   return (
@@ -184,7 +238,9 @@ impl Contract {
       <section className="IDEScreen_maincontainer">
         <div className="IDEScreen_maincontainer_sidebar">
           <div className="IDEScreen_header">
-            <div className="IDEScreen_header_logo"><img height={"100px"} src={Sorobix} alt="sorobix"/></div>
+            <div className="IDEScreen_header_logo">
+              <img height={"100px"} src={Sorobix} alt="sorobix" />
+            </div>
           </div>
           <div className="IDEScreen_maincontainer_sidebar_outercontainer">
             <div className="IDEScreen_maincontainer_sidebar_outercontainer_topcontainer">
@@ -212,31 +268,7 @@ impl Contract {
               </div>
               {funcState === "about" && (
                 <div className="IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_aboutcontainer">
-                  <ReactMarkdown escapeHtml={false}>{`# Sorobix IDE
-
-Welcome to Sorobix IDE, where you can write/deploy and invoke contracts on the Stellar Blockchain using soroban!
-
-## Quickstart
-
-### Import or Generate G/S Keys
-
-Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. However if you do not have a G/S key, you can generate one automatically!
-
-1. On the bottom left panel, you can add your own G/S keys in the Input Field
-2. Incase, you do not have a G/S Key pair, you can generate one using the \`Generate G/S Keys\` buttons and the Key Pair will be auto-filled!
-   
-### Compile and Deploy Contract on Stellar Blockchain
-
-1. Code your contract on the right panel (We already have the \`Hello World\` contract ready for you)
-2. Click on the \`\`\`Compile\`\`\` Button in the bottom left corner of your screen, this will compile your contract
-3. To deploy your contract on the Stellar Blockchain, ensure you have the right G/S KeyPair and click on \`Deploy Contract\` !
-
-### Invoke a Function of a deployed contract
-
-1. Click on the \`Functions\` tab above
-2. Input the required fields such as contract address, function name and parameteres
-3. Ensure you have the right G/S keys set in the left-bottom panel
-4. Click on \`Invoke Contract\` button to invoke the contract on-chain!`}</ReactMarkdown>
+                  <ReactMarkdown escapeHtml={false}>{about}</ReactMarkdown>
                 </div>
               )}
               {funcState === "function" && (
@@ -460,6 +492,12 @@ Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. Howe
         </div>
         <div className="IDEScreen_maincontainer_innercontainer">
           <div className="IDEScreen_maincontainer_innercontainer_codecontainer">
+            <div
+              onClick={tryFormat}
+              className="IDEScreen_maincontainer_innercontainer_codecontainer_formatbutton"
+            >
+              Format Code
+            </div>
             <CodeMirror
               value={code}
               theme="dark"
