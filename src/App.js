@@ -7,8 +7,8 @@ function App() {
   return (
     <Router>
       <Switch>
-        <Route exact path="/" component={HomeScreen} />
-        <Route exact path="/ide" component={IDEScreen} />
+        <Route exact path="/stale-ide" component={HomeScreen} />
+        <Route exact path="/" component={IDEScreen} />
 
       </Switch>
     </Router>
