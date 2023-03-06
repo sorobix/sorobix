@@ -126,8 +126,10 @@ impl Contract {
   };
 
   const onGenerate = async () => {
+    showLoading(true);
     toastId.current = toast.loading("Generating G/S Keys...");
     const res = await api.generateKey();
+    showLoading(false);
     if (res.success) {
       setGSKeys(
         GSKeys.map((el, i) =>
@@ -139,8 +141,12 @@ impl Contract {
             : el
         )
       );
+      showSuccessSnack("G/S keys generated!", toastId.current);
     }
-    showSuccessSnack("G/S keys generated!", toastId.current);
+    else{
+        showErrorSnack("Something went wrong!",toastId.current);
+    }
+    
     console.log("eee");
   };
   const tryCompile = async () => {
@@ -397,6 +403,10 @@ const interleaveArgs = (array1,array2) =>{
                 <div className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_generatecontainer">
                   <div
                     onClick={onGenerate}
+                    style={{
+                      opacity: !showLoading ? "100%" : "50%",
+                      pointerEvents: !showLoading ? "auto" : "none",
+                    }}
                     className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_generatecontainer_generatebutton"
                   >
                     Generate G/S Keys

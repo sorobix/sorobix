@@ -39,7 +39,6 @@ export default class Api {
       const resp = await Axios({
         method: "post",
         url: this.backendURL + `/contract/deploy`,
-        timeout: 24000,
         data,
       });
       return resp.data;
@@ -58,7 +57,6 @@ export default class Api {
       const resp = await Axios({
         method: "post",
         url: this.backendURL + `/contract/compile`,
-        timeout: 18000,
         data,
       });
       return resp.data;
