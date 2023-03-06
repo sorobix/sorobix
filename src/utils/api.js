@@ -1,7 +1,7 @@
 import Axios from "axios";
 
 export default class Api {
-  backendURL = "https://sorobixbackend.eastus.cloudapp.azure.com";
+  backendURL = "https://sorobackend.eastus.cloudapp.azure.com";
 
   async generateKey() {
     try {
