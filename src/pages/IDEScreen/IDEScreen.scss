@@ -270,7 +270,7 @@
           border-bottom: 1px solid black;
         }
         &_textcontainer {
-          @apply flex text-sm px-4 py-2 font-bold text-zinc-500 prose prose-invert;
+          @apply flex text-sm px-4 py-2 font-bold text-zinc-500;
           overflow: auto;
           height: 100%;
         }

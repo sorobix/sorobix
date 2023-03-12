@@ -163,9 +163,14 @@ impl Contract {
     if (res.success) {
       setCompileSuccess(true);
       showSuccessSnack("Compilation Successful", toastId.current);
-      setOutput(res.message);
+      setOutput(res.message.replace(/\n/g, "<br>"));
     } else {
-      setOutput(res?.message);
+        // console.log("before", res?.message);
+        const errMessage = res.message.split("\\n").join("<br>");
+        console.log(typeof(res.message))
+
+        console.log("post",errMessage);
+      setOutput(errMessage);
       showErrorSnack("Compilation Failed!", toastId.current);
     }
   };
@@ -522,7 +527,7 @@ const interleaveArgs = (array1,array2) =>{
               Output
             </div>
             <div className="IDEScreen_maincontainer_innercontainer_outputcontainer_textcontainer">
-              {output}
+              <div dangerouslySetInnerHTML={{__html:output}}></div>
             </div>
           </div>
         </div>
