@@ -113,7 +113,6 @@ impl Contract {
       code: encodedCode,
     };
     const res = await api.formatCode(data);
-    setShowLoading(false);
     console.log(res);
     if (res.status === 200) {
       showSuccessSnack("Code Formatted!!!", toastId.current);
@@ -127,10 +126,10 @@ impl Contract {
   };
 
   const onGenerate = async () => {
-    setShowLoading(true);
+    showLoading(true);
     toastId.current = toast.loading("Generating G/S Keys...");
     const res = await api.generateKey();
-    setShowLoading(false);
+    showLoading(false);
     if (res.success) {
       setGSKeys(
         GSKeys.map((el, i) =>
