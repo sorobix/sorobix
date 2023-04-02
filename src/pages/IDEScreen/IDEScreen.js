@@ -52,7 +52,7 @@ Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. Howe
   ]);
   const [compileSuccess, setCompileSuccess] = useState(false);
   const [invokeSuccess, setInvokeSuccess] = useState(false);
-  const [showLoading, setShowLoading] = useState(false);
+  const [showLoading, setShowLoading] = useState(true);
   const [output, setOutput] = useState("");
   const [results, setResults] = useState(
     "sdsd dsdwwdwdw wdwwddwdwdwswswswwsswswsw"
@@ -100,6 +100,16 @@ impl Contract {
   useEffect(() => {
     if (localStorage.getItem("GSKeys"))
       setGSKeys(JSON.parse(localStorage.getItem("GSKeys")));
+    toast("🦄 We will be back in 2 days!", {
+      position: "top-right",
+      autoClose: 7000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
   }, []);
   useEffect(() => {
     localStorage.setItem("GSKeys", JSON.stringify(GSKeys));
@@ -380,12 +390,12 @@ const interleaveArgs = (array1,array2) =>{
                     style={{
                       opacity:
                         (functionName !== "" && contractAddress !== "") ||
-                        showLoading
+                        !showLoading
                           ? "100%"
                           : "50%",
                       pointerEvents:
                         (functionName !== "" && contractAddress !== "") ||
-                        showLoading
+                        !showLoading
                           ? "auto"
                           : "none",
                     }}
@@ -510,6 +520,11 @@ const interleaveArgs = (array1,array2) =>{
           <div className="IDEScreen_maincontainer_innercontainer_codecontainer">
             <div
               onClick={tryFormat}
+              style={{
+                opacity: !showLoading ? "100%" : "50%",
+                pointerEvents:
+                  !showLoading  ? "auto" : "none",
+              }}
               className="IDEScreen_maincontainer_innercontainer_codecontainer_formatbutton"
             >
               Format Code
@@ -527,7 +542,7 @@ const interleaveArgs = (array1,array2) =>{
               Output
             </div>
             <div className="IDEScreen_maincontainer_innercontainer_outputcontainer_textcontainer">
-              <div dangerouslySetInnerHTML={{__html:output}}></div>
+              <div dangerouslySetInnerHTML={{ __html: output }}></div>
             </div>
           </div>
         </div>
