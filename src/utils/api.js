@@ -44,11 +44,16 @@ export default class Api {
       });
       return resp.data;
     } catch (err) {
+      const errorMessage = {
+        status: false,
+        message: "Unexpected error! Please try again.",
+      };
+
       if (!err.response) {
-        return "err";
+        return errorMessage;
       }
       if (err.response.status === 500 || err.response.status === 401) {
-        return "err";
+        return errorMessage;
       }
       return err.response.data;
     }
@@ -62,12 +67,17 @@ export default class Api {
       });
       return resp.data;
     } catch (err) {
+      const errorMessage = {
+        status: false,
+        message: "Unexpected error! Please try again.",
+      };
       if (!err.response) {
-        return "err";
+        return errorMessage;
       }
       if (err.response.status === 500 || err.response.status === 401) {
-        return "err";
+        return errorMessage;
       }
+      console.log(err.response);
       return err.response.data;
     }
   }

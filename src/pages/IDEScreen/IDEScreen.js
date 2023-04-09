@@ -152,11 +152,10 @@ impl Contract {
         )
       );
       showSuccessSnack("G/S keys generated!", toastId.current);
+    } else {
+      showErrorSnack("Something went wrong!", toastId.current);
     }
-    else{
-        showErrorSnack("Something went wrong!",toastId.current);
-    }
-    
+
     console.log("eee");
   };
   const tryCompile = async () => {
@@ -176,13 +175,9 @@ impl Contract {
         res.data.CompileContractResponse.compiler_output.replace(/\n/g, "<br>")
       );
     } else {
-        // console.log("before", res?.message);
-        const errMessage =
-          res.data.CompileContractResponse.compiler_output.split("\\n").join("<br>");
-
-        console.log("post",errMessage);
-      setOutput(errMessage);
       showErrorSnack("Compilation Failed!", toastId.current);
+      const errMessage = res.message.split("\\n").join("<br>");
+      setOutput(errMessage);
     }
   };
   const tryDeploy = async () => {
@@ -198,31 +193,25 @@ impl Contract {
     if (res.status) {
       setCompileSuccess(true);
       showSuccessSnack("Contract Successfully Deployed!", toastId.current);
-      // showSuccessSnack(res?.contract_id);
       setOutput(
-        `contract_id: ${res?.data.DeployContractResponse.contract_hash}message: ${res?.data.DeployContractResponse.compiler_output}`
+        `contract_id: ${res?.data.DeployContractResponse.contract_hash} 
+        
+        message: ${res?.data.DeployContractResponse.compiler_output}`
       );
     } else {
-      setOutput(res?.data.DeployContractResponse.compiler_output);
+      setOutput(res?.message);
       showErrorSnack("Contract Deployment Failed!", toastId.current);
     }
   };
-//   const interleaveArgs = (array1, array2) =>
-//     array1
-//       .concat(array2)
-//       .filter((x) => x)
-//       .flatMap((x, i) => [x, array2[i]])
-//       .slice(0, array1.length + array2.length - 1);
-const interleaveArgs = (array1,array2) =>{
+
+  const interleaveArgs = (array1, array2) => {
     const mergedArr = [];
-    array1.forEach((val,i)=>{
-        if(val!=="")
-        mergedArr.push(val);
-        if(array2[i]!=="")
-        mergedArr.push(array2[i]);
+    array1.forEach((val, i) => {
+      if (val !== "") mergedArr.push(val);
+      if (array2[i] !== "") mergedArr.push(array2[i]);
     });
     return mergedArr;
-}
+  };
 
   const tryInvoke = async () => {
     toastId.current = toast.loading("Invoking Contract...");
@@ -244,6 +233,7 @@ const interleaveArgs = (array1,array2) =>{
       showSuccessSnack("Success", toastId.current);
       setOutput(`message: ${res?.data.InvokeContractResponse.result}`);
     } else {
+      setOutput(`message: ${res?.message}`);
       showErrorSnack("Invoke Failed", toastId.current);
     }
   };
@@ -523,8 +513,7 @@ const interleaveArgs = (array1,array2) =>{
               onClick={tryFormat}
               style={{
                 opacity: !showLoading ? "100%" : "50%",
-                pointerEvents:
-                  !showLoading  ? "auto" : "none",
+                pointerEvents: !showLoading ? "auto" : "none",
               }}
               className="IDEScreen_maincontainer_innercontainer_codecontainer_formatbutton"
             >
