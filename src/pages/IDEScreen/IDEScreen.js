@@ -52,21 +52,19 @@ Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. Howe
   ]);
   const [compileSuccess, setCompileSuccess] = useState(false);
   const [invokeSuccess, setInvokeSuccess] = useState(false);
-  const [showLoading, setShowLoading] = useState(true);
-  const [output, setOutput] = useState("");
+  const [showLoading, setShowLoading] = useState(false);
+  const [output, setOutput] = useState(``);
   const [results, setResults] = useState(
     "sdsd dsdwwdwdw wdwwddwdwdwswswswwsswswsw"
   );
 
   const [code, setCode] = useState(`#![no_std]
-use soroban_sdk::{contractimpl, symbol, vec, Env, Symbol, Vec};
-
+use soroban_sdk::{contractimpl, vec, Env, Symbol, Vec};
 pub struct Contract;
-
 #[contractimpl]
 impl Contract {
     pub fn hello(env: Env, to: Symbol) -> Vec<Symbol> {
-        vec![&env, symbol!("Hello"), to]
+        vec![&env, Symbol::short("Hello"), to]
     }
 }`);
   const onChange = React.useCallback((value, viewUpdate) => {
@@ -100,16 +98,16 @@ impl Contract {
   useEffect(() => {
     if (localStorage.getItem("GSKeys"))
       setGSKeys(JSON.parse(localStorage.getItem("GSKeys")));
-    toast("🦄 We will be back in 2 days!", {
-      position: "top-right",
-      autoClose: 7000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-    });
+    // toast("🦄 We will be back in 2 days!", {
+    //   position: "top-right",
+    //   autoClose: 7000,
+    //   hideProgressBar: false,
+    //   closeOnClick: true,
+    //   pauseOnHover: true,
+    //   draggable: true,
+    //   progress: undefined,
+    //   theme: "dark",
+    // });
   }, []);
   useEffect(() => {
     localStorage.setItem("GSKeys", JSON.stringify(GSKeys));
@@ -140,14 +138,15 @@ impl Contract {
     setShowLoading(true);
     toastId.current = toast.loading("Generating G/S Keys...");
     const res = await api.generateKey();
+    console.log(res);
     setShowLoading(false);
-    if (res.success) {
+    if (res.status) {
       setGSKeys(
         GSKeys.map((el, i) =>
           i === accountID
             ? {
-                G: res.pub_key,
-                S: res.secret_seed,
+                G: res.data.GenerateAccountResponse.public_key,
+                S: res.data.GenerateAccountResponse.private_key,
               }
             : el
         )
@@ -170,14 +169,16 @@ impl Contract {
     console.log(res);
     setShowLoading(false);
 
-    if (res.success) {
+    if (res.status) {
       setCompileSuccess(true);
       showSuccessSnack("Compilation Successful", toastId.current);
-      setOutput(res.message.replace(/\n/g, "<br>"));
+      setOutput(
+        res.data.CompileContractResponse.compiler_output.replace(/\n/g, "<br>")
+      );
     } else {
         // console.log("before", res?.message);
-        const errMessage = res.message.split("\\n").join("<br>");
-        console.log(typeof(res.message))
+        const errMessage =
+          res.data.CompileContractResponse.compiler_output.split("\\n").join("<br>");
 
         console.log("post",errMessage);
       setOutput(errMessage);
@@ -192,16 +193,17 @@ impl Contract {
     setOutput("");
     const data = { lib_file: code, secret_key: GSKeys[accountID].S };
     const res = await api.deployContract(data);
-    console.log(res.message);
     setShowLoading(false);
 
-    if (res.success) {
+    if (res.status) {
       setCompileSuccess(true);
       showSuccessSnack("Contract Successfully Deployed!", toastId.current);
       // showSuccessSnack(res?.contract_id);
-      setOutput(`contract_id: ${res?.contract_id}message: ${res?.message}`);
+      setOutput(
+        `contract_id: ${res?.data.DeployContractResponse.contract_hash}message: ${res?.data.DeployContractResponse.compiler_output}`
+      );
     } else {
-      setOutput(res?.message);
+      setOutput(res?.data.DeployContractResponse.compiler_output);
       showErrorSnack("Contract Deployment Failed!", toastId.current);
     }
   };
@@ -235,13 +237,12 @@ const interleaveArgs = (array1,array2) =>{
       contract_arguments: interleaveArgs(functionKeys, functionValues),
     };
     const res = await api.invokeContract(data);
-    console.log(res?.results);
     setShowLoading(false);
 
-    if (res.success) {
+    if (res.status) {
       setInvokeSuccess(true);
       showSuccessSnack("Success", toastId.current);
-      setOutput(`message: ${res?.results}`);
+      setOutput(`message: ${res?.data.InvokeContractResponse.result}`);
     } else {
       showErrorSnack("Invoke Failed", toastId.current);
     }

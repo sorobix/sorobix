@@ -1,13 +1,14 @@
 import Axios from "axios";
 
 export default class Api {
-  backendURL = "https://sorobackend.eastus.cloudapp.azure.com";
+  backendURL = "https://backend.sorobix.xyz";
 
   async generateKey() {
     try {
       const resp = await Axios({
-        method: "get",
-        url: this.backendURL + `/account/generate`,
+        method: "post",
+        url: this.backendURL + `/api/account`,
+        data: { username: "sorobix" },
       });
       return resp.data;
     } catch (err) {
@@ -20,25 +21,25 @@ export default class Api {
       return err.response.data;
     }
   }
-  async formatCode(data){
-        try {
-          const resp = await Axios({
-            method: "post",
-            url: `https://sorobixfmt.eastus.cloudapp.azure.com/`,
-            data,
-          });
-          console.log(resp);
-          return resp;
-        } catch (err) {
-          return err.response;
-        }
+  async formatCode(data) {
+    try {
+      const resp = await Axios({
+        method: "post",
+        url: this.backendURL + `/formatter`,
+        data,
+      });
+      console.log(resp);
+      return resp;
+    } catch (err) {
+      return err.response;
+    }
   }
 
   async deployContract(data) {
     try {
       const resp = await Axios({
         method: "post",
-        url: this.backendURL + `/contract/deploy`,
+        url: this.backendURL + `/api/deploy`,
         data,
       });
       return resp.data;
@@ -56,7 +57,7 @@ export default class Api {
     try {
       const resp = await Axios({
         method: "post",
-        url: this.backendURL + `/contract/compile`,
+        url: this.backendURL + `/api/compile`,
         data,
       });
       return resp.data;
@@ -75,7 +76,7 @@ export default class Api {
     try {
       const resp = await Axios({
         method: "post",
-        url: this.backendURL + `/contract/invoke`,
+        url: this.backendURL + `/api/invoke`,
         data,
       });
       return resp.data;
