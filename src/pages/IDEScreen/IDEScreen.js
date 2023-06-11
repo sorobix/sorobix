@@ -12,6 +12,7 @@ import DropDown from "./DropDown/DropDown";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ReactMarkdown from "react-markdown";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 
 export default function IDEScreen() {
   const [accountID, setAccountID] = useState(0);
@@ -54,9 +55,24 @@ Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. Howe
   const [invokeSuccess, setInvokeSuccess] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
   const [output, setOutput] = useState(``);
-  const [results, setResults] = useState(
-    "sdsd dsdwwdwdw wdwwddwdwdwswswswwsswswsw"
+  const [compileKey, setCompileKey] = useState("");
+
+  const [socketUrl, setSocketUrl] = useState(
+    "wss://backend.sorobix.xyz/ws/format"
   );
+  const [formatHistory, setFormatHistory] = useState([]);
+  const [compileHistory, setCompileHistory] = useState([]);
+
+  const formatterWS = useWebSocket(socketUrl, {
+    onOpen: () => console.log("formatter opened"),
+  });
+  const compilerWS = useWebSocket("wss://backend.sorobix.xyz/ws/compile", {
+    onOpen: () => console.log("compiler opened"),
+  });
+  // const { sendMessage, lastMessage, readyState, sendJsonMessage } =
+  //   useWebSocket(socketUrl, {
+  //     onOpen: () => console.log("opened"),
+  //   });
 
   const [code, setCode] = useState(`#![no_std]
 use soroban_sdk::{contractimpl, vec, Env, Symbol, Vec};
@@ -96,42 +112,71 @@ impl Contract {
   const api = new Api();
 
   useEffect(() => {
+    if (formatterWS.lastMessage !== null) {
+      setFormatHistory((prev) => prev.concat(formatterWS.lastMessage));
+    }
+    console.log(formatterWS.lastMessage);
+    if (formatterWS.lastMessage?.data.includes("false")) {
+      showErrorSnack("Syntax Error!", toastId.current);
+      setShowLoading(false);
+    } else {
+      const res = formatterWS?.lastMessage?.data
+        ? JSON.parse(atob(formatterWS?.lastMessage?.data))
+        : "none";
+      if (res.Success && res !== "none") {
+        showSuccessSnack("Code Formatted!!!", toastId.current);
+        const decodedCode = atob(res.Data);
+        setCode(decodedCode);
+        setShowLoading(false);
+      } else if (!res.Success && res !== "none") {
+        showErrorSnack("Syntax Error!", toastId.current);
+        setShowLoading(false);
+      } else {
+        showErrorSnack("Something went wrong!", toastId.current);
+        setShowLoading(false);
+      }
+    }
+  }, [formatterWS.lastMessage, setFormatHistory]);
+  useEffect(() => {
+    if (compilerWS.lastMessage !== null) {
+      setCompileHistory((prev) => prev.concat(compilerWS.lastMessage));
+    }
+    console.log(compilerWS.lastMessage);
+    if (compilerWS.lastMessage?.data !== "Compiling") {
+      const res = compilerWS?.lastMessage?.data
+        ? JSON.parse(atob(compilerWS?.lastMessage?.data))
+        : "none";
+      console.log(res, res.Success, res !== "none", res.Id);
+      if (res.Success && res !== "none") {
+        setCompileSuccess(true);
+        showSuccessSnack("Compilation Successful", toastId.current);
+        setOutput(res.Message);
+        setCompileKey(res.Id);
+      } else if (!res.Success && res !== "none") {
+        showErrorSnack("Compilation Failed!", toastId.current);
+        const errMessage = res.Message?.split("\\n").join("<br>");
+        setOutput(errMessage);
+      } else {
+        showErrorSnack("Something went wrong!", toastId.current);
+      }
+    }
+  }, [compilerWS.lastMessage, setCompileHistory]);
+  useEffect(() => {
     if (localStorage.getItem("GSKeys"))
       setGSKeys(JSON.parse(localStorage.getItem("GSKeys")));
-    // toast("🦄 We will be back in 2 days!", {
-    //   position: "top-right",
-    //   autoClose: 7000,
-    //   hideProgressBar: false,
-    //   closeOnClick: true,
-    //   pauseOnHover: true,
-    //   draggable: true,
-    //   progress: undefined,
-    //   theme: "dark",
-    // });
   }, []);
   useEffect(() => {
     localStorage.setItem("GSKeys", JSON.stringify(GSKeys));
   }, [GSKeys]);
+  useEffect(() => {}, []);
 
   const tryFormat = async () => {
     toastId.current = toast.loading("Formatting code...");
     setShowLoading(true);
     const encodedCode = btoa(code);
-    const data = {
-      code: encodedCode,
-    };
-    const res = await api.formatCode(data);
-    console.log(res);
-    setShowLoading(false);
-    if (res.status === 200) {
-      showSuccessSnack("Code Formatted!!!", toastId.current);
-      const decodedCode = atob(res.data.formatted_code);
-      setCode(decodedCode);
-    } else {
-      if (res?.status === 406) {
-        showErrorSnack("Syntax Error!", toastId.current);
-      } else showErrorSnack("Something went wrong!", toastId.current);
-    }
+    formatterWS.sendMessage(
+      "IyFbbm9fc3RkXQp1c2Ugc29yb2Jhbl9zZGs6Ontjb250cmFjdGltcGwsIHZlYywgRW52LCBTeW1ib2wsIFZlY307CnB1YiBzdHJ1Y3QgQ29udHJhY3Q7CiNbY29udHJhY3RpbXBsXQppbXBsIENvbnRyYWN0IHsKICAgICAgICAgICAgICBwdWIgZm4gaGVsbG8oZW52OiBFbnYsIHRvOiBTeW1ib2wpIC0+IFZlYzxTeW1ib2w+IHsKICAgICAgICB2ZWMhWyZlbnYsIFN5bWJvbDo6c2hvcnQoIkhlbGxvIiksIHRvXQogICAgfQp9Cg=="
+    );
   };
 
   const onGenerate = async () => {
@@ -163,22 +208,15 @@ impl Contract {
     setShowLoading(true);
     setCompileSuccess(false);
     setOutput("");
-    const data = { lib_file: code };
-    const res = await api.compileContract(data);
+    const encodedCode = btoa(code);
+    const data = {
+      cargoToml:
+        "W3BhY2thZ2VdCm5hbWUgPSAic29yb2JpeF90ZW1wIgp2ZXJzaW9uID0gIjAuMS4wIgplZGl0aW9uID0gIjIwMjEiCgpbbGliXQpjcmF0ZS10eXBlID0gWyJjZHlsaWIiXQoKW2ZlYXR1cmVzXQp0ZXN0dXRpbHMgPSBbInNvcm9iYW4tc2RrL3Rlc3R1dGlscyJdCgpbZGVwZW5kZW5jaWVzXQpzb3JvYmFuLXNkayA9ICIwLjguNCIKCltkZXZfZGVwZW5kZW5jaWVzXQpzb3JvYmFuLXNkayA9IHsgdmVyc2lvbiA9ICIwLjguNCIsIGZlYXR1cmVzID0gWyJ0ZXN0dXRpbHMiXSB9CgpbcHJvZmlsZS5yZWxlYXNlXQpvcHQtbGV2ZWwgPSAieiIKb3ZlcmZsb3ctY2hlY2tzID0gdHJ1ZQpkZWJ1ZyA9IDAKc3RyaXAgPSAic3ltYm9scyIKZGVidWctYXNzZXJ0aW9ucyA9IGZhbHNlCnBhbmljID0gImFib3J0Igpjb2RlZ2VuLXVuaXRzID0gMQpsdG8gPSB0cnVlCgpbcHJvZmlsZS5yZWxlYXNlLXdpdGgtbG9nc10KaW5oZXJpdHMgPSAicmVsZWFzZSIKZGVidWctYXNzZXJ0aW9ucyA9IHRydWU=",
+      MainRs: encodedCode,
+    };
+    const res = compilerWS.sendJsonMessage(data);
     console.log(res);
     setShowLoading(false);
-
-    if (res.status) {
-      setCompileSuccess(true);
-      showSuccessSnack("Compilation Successful", toastId.current);
-      setOutput(
-        res.data.CompileContractResponse.compiler_output.replace(/\n/g, "<br>")
-      );
-    } else {
-      showErrorSnack("Compilation Failed!", toastId.current);
-      const errMessage = res.message.split("\\n").join("<br>");
-      setOutput(errMessage);
-    }
   };
   const tryDeploy = async () => {
     toastId.current = toast.loading("Deploying Contract...");
@@ -186,7 +224,7 @@ impl Contract {
 
     setCompileSuccess(false);
     setOutput("");
-    const data = { lib_file: code, secret_key: GSKeys[accountID].S };
+    const data = { lib_file: compileKey, secret_key: GSKeys[accountID].S };
     const res = await api.deployContract(data);
     setShowLoading(false);
 
@@ -218,7 +256,6 @@ impl Contract {
 
     setShowLoading(true);
     setInvokeSuccess(false);
-    setResults("");
     const data = {
       contract_id: contractAddress,
       contract_function: functionName,
@@ -494,9 +531,13 @@ impl Contract {
                     onClick={tryDeploy}
                     style={{
                       opacity:
-                        !showLoading && GSKeys[accountID].S ? "100%" : "50%",
+                        !showLoading && GSKeys[accountID].S && compileSuccess
+                          ? "100%"
+                          : "50%",
                       pointerEvents:
-                        !showLoading && GSKeys[accountID].S ? "auto" : "none",
+                        !showLoading && GSKeys[accountID].S && compileSuccess
+                          ? "auto"
+                          : "none",
                     }}
                     className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_buttonscontainer_deploy"
                   >
