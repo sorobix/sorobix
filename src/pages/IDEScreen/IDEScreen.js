@@ -232,10 +232,13 @@ impl Contract {
       setCompileSuccess(true);
       showSuccessSnack("Contract Successfully Deployed!", toastId.current);
       setOutput(
-        `contract_id: ${res?.data.DeployContractResponse.contract_hash} 
-        
-        message: ${res?.data.DeployContractResponse.compiler_output}`
+        `contract_id: ${res?.data.DeployContractResponse.contract_hash}`
       );
+      // setOutput(
+      //   `contract_id: ${res?.data.DeployContractResponse.contract_hash}
+
+      //   message: ${res?.data.DeployContractResponse.compiler_output}`
+      // );
     } else {
       setOutput(res?.message);
       showErrorSnack("Contract Deployment Failed!", toastId.current);
@@ -250,6 +253,9 @@ impl Contract {
     });
     return mergedArr;
   };
+  const prependDoubleDash = (strings) => {
+    return strings.map((str) => (str !== "" ? "--" + str : str));
+  };
 
   const tryInvoke = async () => {
     toastId.current = toast.loading("Invoking Contract...");
@@ -260,7 +266,10 @@ impl Contract {
       contract_id: contractAddress,
       contract_function: functionName,
       secret_key: GSKeys[accountID].S,
-      contract_arguments: interleaveArgs(functionKeys, functionValues),
+      contract_arguments: interleaveArgs(
+        prependDoubleDash(functionKeys),
+        functionValues
+      ),
     };
     const res = await api.invokeContract(data);
     setShowLoading(false);
