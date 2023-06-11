@@ -175,7 +175,7 @@ impl Contract {
     setShowLoading(true);
     const encodedCode = btoa(code);
     formatterWS.sendMessage(
-      "IyFbbm9fc3RkXQp1c2Ugc29yb2Jhbl9zZGs6Ontjb250cmFjdGltcGwsIHZlYywgRW52LCBTeW1ib2wsIFZlY307CnB1YiBzdHJ1Y3QgQ29udHJhY3Q7CiNbY29udHJhY3RpbXBsXQppbXBsIENvbnRyYWN0IHsKICAgICAgICAgICAgICBwdWIgZm4gaGVsbG8oZW52OiBFbnYsIHRvOiBTeW1ib2wpIC0+IFZlYzxTeW1ib2w+IHsKICAgICAgICB2ZWMhWyZlbnYsIFN5bWJvbDo6c2hvcnQoIkhlbGxvIiksIHRvXQogICAgfQp9Cg=="
+      encodedCode
     );
   };
 
