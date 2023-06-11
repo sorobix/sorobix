@@ -64,15 +64,9 @@ Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. Howe
   const [compileHistory, setCompileHistory] = useState([]);
 
   const formatterWS = useWebSocket(socketUrl, {
-    onOpen: () => console.log("formatter opened"),
   });
   const compilerWS = useWebSocket("wss://backend.sorobix.xyz/ws/compile", {
-    onOpen: () => console.log("compiler opened"),
   });
-  // const { sendMessage, lastMessage, readyState, sendJsonMessage } =
-  //   useWebSocket(socketUrl, {
-  //     onOpen: () => console.log("opened"),
-  //   });
 
   const [code, setCode] = useState(`#![no_std]
 use soroban_sdk::{contractimpl, vec, Env, Symbol, Vec};
@@ -115,7 +109,6 @@ impl Contract {
     if (formatterWS.lastMessage !== null) {
       setFormatHistory((prev) => prev.concat(formatterWS.lastMessage));
     }
-    console.log(formatterWS.lastMessage);
     if (formatterWS.lastMessage?.data.includes("false")) {
       showErrorSnack("Syntax Error!", toastId.current);
       setShowLoading(false);
@@ -141,12 +134,10 @@ impl Contract {
     if (compilerWS.lastMessage !== null) {
       setCompileHistory((prev) => prev.concat(compilerWS.lastMessage));
     }
-    console.log(compilerWS.lastMessage);
     if (compilerWS.lastMessage?.data !== "Compiling") {
       const res = compilerWS?.lastMessage?.data
         ? JSON.parse(atob(compilerWS?.lastMessage?.data))
         : "none";
-      console.log(res, res.Success, res !== "none", res.Id);
       if (res.Success && res !== "none") {
         setCompileSuccess(true);
         showSuccessSnack("Compilation Successful", toastId.current);
@@ -183,7 +174,6 @@ impl Contract {
     setShowLoading(true);
     toastId.current = toast.loading("Generating G/S Keys...");
     const res = await api.generateKey();
-    console.log(res);
     setShowLoading(false);
     if (res.status) {
       setGSKeys(
@@ -201,7 +191,6 @@ impl Contract {
       showErrorSnack("Something went wrong!", toastId.current);
     }
 
-    console.log("eee");
   };
   const tryCompile = async () => {
     toastId.current = toast.loading("Compiling Contract...");
@@ -214,8 +203,7 @@ impl Contract {
         "W3BhY2thZ2VdCm5hbWUgPSAic29yb2JpeF90ZW1wIgp2ZXJzaW9uID0gIjAuMS4wIgplZGl0aW9uID0gIjIwMjEiCgpbbGliXQpjcmF0ZS10eXBlID0gWyJjZHlsaWIiXQoKW2ZlYXR1cmVzXQp0ZXN0dXRpbHMgPSBbInNvcm9iYW4tc2RrL3Rlc3R1dGlscyJdCgpbZGVwZW5kZW5jaWVzXQpzb3JvYmFuLXNkayA9ICIwLjguNCIKCltkZXZfZGVwZW5kZW5jaWVzXQpzb3JvYmFuLXNkayA9IHsgdmVyc2lvbiA9ICIwLjguNCIsIGZlYXR1cmVzID0gWyJ0ZXN0dXRpbHMiXSB9CgpbcHJvZmlsZS5yZWxlYXNlXQpvcHQtbGV2ZWwgPSAieiIKb3ZlcmZsb3ctY2hlY2tzID0gdHJ1ZQpkZWJ1ZyA9IDAKc3RyaXAgPSAic3ltYm9scyIKZGVidWctYXNzZXJ0aW9ucyA9IGZhbHNlCnBhbmljID0gImFib3J0Igpjb2RlZ2VuLXVuaXRzID0gMQpsdG8gPSB0cnVlCgpbcHJvZmlsZS5yZWxlYXNlLXdpdGgtbG9nc10KaW5oZXJpdHMgPSAicmVsZWFzZSIKZGVidWctYXNzZXJ0aW9ucyA9IHRydWU=",
       MainRs: encodedCode,
     };
-    const res = compilerWS.sendJsonMessage(data);
-    console.log(res);
+    compilerWS.sendJsonMessage(data);
     setShowLoading(false);
   };
   const tryDeploy = async () => {
@@ -480,8 +468,6 @@ impl Contract {
                       className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_keycontainer_value_input"
                       value={GSKeys[accountID].G}
                       onChange={(e) => {
-                        // console.log(accountID,"aid");
-                        // console.log(GSKeys);
                         setGSKeys(
                           GSKeys.map((el, i) =>
                             i === accountID
@@ -509,8 +495,6 @@ impl Contract {
                       className="IDEScreen_maincontainer_sidebar_outercontainer_bottomcontainer_executecontainer_keycontainer_value_input"
                       value={GSKeys[accountID].S}
                       onChange={(e) => {
-                        // console.log(accountID,"aid");
-                        console.log(GSKeys);
                         setGSKeys(
                           GSKeys.map((el, i) =>
                             i === accountID
