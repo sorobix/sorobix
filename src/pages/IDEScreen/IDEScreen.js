@@ -13,6 +13,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ReactMarkdown from "react-markdown";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import { langs } from "@uiw/codemirror-extensions-langs";
 
 export default function IDEScreen() {
   const [accountID, setAccountID] = useState(0);
@@ -21,6 +22,36 @@ export default function IDEScreen() {
   const [funcState, setFuncState] = useState("about");
   const [contractAddress, setContractAddress] = useState("");
   const [functionName, setFunctionName] = useState("");
+  const defaultCargoToml = `[package]
+name = "project_name"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+testutils = ["soroban-sdk/testutils"]
+
+[dependencies]
+soroban-sdk = "0.8.4"
+
+[dev_dependencies]
+soroban-sdk = { version = "0.8.4", features = ["testutils"] }
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
+
+[profile.release-with-logs]
+inherits = "release"
+debug-assertions = true`;
   const about = `# Sorobix IDE
 
 Welcome to Sorobix IDE, where you can write/deploy and invoke contracts on the Stellar Blockchain using Soroban!
@@ -63,11 +94,9 @@ Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. Howe
   const [formatHistory, setFormatHistory] = useState([]);
   const [compileHistory, setCompileHistory] = useState([]);
 
-  const formatterWS = useWebSocket(socketUrl, {
-  });
-  const compilerWS = useWebSocket("wss://backend.sorobix.xyz/ws/compile", {
-  });
-
+  const formatterWS = useWebSocket(socketUrl, {});
+  const compilerWS = useWebSocket("wss://backend.sorobix.xyz/ws/compile", {});
+  const [toml, setToml] = useState(defaultCargoToml);
   const [code, setCode] = useState(`#![no_std]
 use soroban_sdk::{contractimpl, vec, Env, Symbol, Vec};
 pub struct Contract;
@@ -79,6 +108,9 @@ impl Contract {
 }`);
   const onChange = React.useCallback((value, viewUpdate) => {
     setCode(value);
+  }, []);
+  const onChangeToml = React.useCallback((value, viewUpdate) => {
+    setToml(value);
   }, []);
   const showErrorSnack = (message, id) => {
     toast.update(id, {
@@ -165,9 +197,7 @@ impl Contract {
     toastId.current = toast.loading("Formatting code...");
     setShowLoading(true);
     const encodedCode = btoa(code);
-    formatterWS.sendMessage(
-      encodedCode
-    );
+    formatterWS.sendMessage(encodedCode);
   };
 
   const onGenerate = async () => {
@@ -190,7 +220,6 @@ impl Contract {
     } else {
       showErrorSnack("Something went wrong!", toastId.current);
     }
-
   };
   const tryCompile = async () => {
     toastId.current = toast.loading("Compiling Contract...");
@@ -198,11 +227,16 @@ impl Contract {
     setCompileSuccess(false);
     setOutput("");
     const encodedCode = btoa(code);
+    const encodedToml = btoa(toml);
     const data = {
-      cargoToml:
-        "W3BhY2thZ2VdCm5hbWUgPSAic29yb2JpeF90ZW1wIgp2ZXJzaW9uID0gIjAuMS4wIgplZGl0aW9uID0gIjIwMjEiCgpbbGliXQpjcmF0ZS10eXBlID0gWyJjZHlsaWIiXQoKW2ZlYXR1cmVzXQp0ZXN0dXRpbHMgPSBbInNvcm9iYW4tc2RrL3Rlc3R1dGlscyJdCgpbZGVwZW5kZW5jaWVzXQpzb3JvYmFuLXNkayA9ICIwLjguNCIKCltkZXZfZGVwZW5kZW5jaWVzXQpzb3JvYmFuLXNkayA9IHsgdmVyc2lvbiA9ICIwLjguNCIsIGZlYXR1cmVzID0gWyJ0ZXN0dXRpbHMiXSB9CgpbcHJvZmlsZS5yZWxlYXNlXQpvcHQtbGV2ZWwgPSAieiIKb3ZlcmZsb3ctY2hlY2tzID0gdHJ1ZQpkZWJ1ZyA9IDAKc3RyaXAgPSAic3ltYm9scyIKZGVidWctYXNzZXJ0aW9ucyA9IGZhbHNlCnBhbmljID0gImFib3J0Igpjb2RlZ2VuLXVuaXRzID0gMQpsdG8gPSB0cnVlCgpbcHJvZmlsZS5yZWxlYXNlLXdpdGgtbG9nc10KaW5oZXJpdHMgPSAicmVsZWFzZSIKZGVidWctYXNzZXJ0aW9ucyA9IHRydWU=",
+      cargoToml: encodedToml,
       MainRs: encodedCode,
     };
+    // const data = {
+    //   cargoToml:
+    //     "W3BhY2thZ2VdCm5hbWUgPSAic29yb2JpeF90ZW1wIgp2ZXJzaW9uID0gIjAuMS4wIgplZGl0aW9uID0gIjIwMjEiCgpbbGliXQpjcmF0ZS10eXBlID0gWyJjZHlsaWIiXQoKW2ZlYXR1cmVzXQp0ZXN0dXRpbHMgPSBbInNvcm9iYW4tc2RrL3Rlc3R1dGlscyJdCgpbZGVwZW5kZW5jaWVzXQpzb3JvYmFuLXNkayA9ICIwLjguNCIKCltkZXZfZGVwZW5kZW5jaWVzXQpzb3JvYmFuLXNkayA9IHsgdmVyc2lvbiA9ICIwLjguNCIsIGZlYXR1cmVzID0gWyJ0ZXN0dXRpbHMiXSB9CgpbcHJvZmlsZS5yZWxlYXNlXQpvcHQtbGV2ZWwgPSAieiIKb3ZlcmZsb3ctY2hlY2tzID0gdHJ1ZQpkZWJ1ZyA9IDAKc3RyaXAgPSAic3ltYm9scyIKZGVidWctYXNzZXJ0aW9ucyA9IGZhbHNlCnBhbmljID0gImFib3J0Igpjb2RlZ2VuLXVuaXRzID0gMQpsdG8gPSB0cnVlCgpbcHJvZmlsZS5yZWxlYXNlLXdpdGgtbG9nc10KaW5oZXJpdHMgPSAicmVsZWFzZSIKZGVidWctYXNzZXJ0aW9ucyA9IHRydWU=",
+    //   MainRs: encodedCode,
+    // };
     compilerWS.sendJsonMessage(data);
     setShowLoading(false);
   };
@@ -306,13 +340,34 @@ impl Contract {
                   onClick={() => {
                     setFuncState("function");
                   }}
-                  className={`IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_bar_right ${
+                  className={`IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_bar_middle ${
                     funcState === "function" ? "activeBG" : ""
                   }`}
                 >
                   Functions
                 </div>
+                <div
+                  onClick={() => {
+                    setFuncState("cargo");
+                  }}
+                  className={`IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_bar_right ${
+                    funcState === "cargo" ? "activeBG" : ""
+                  }`}
+                >
+                  Cargo File
+                </div>
               </div>
+              {funcState === "cargo" && (
+                <div className="IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_aboutcontainer">
+                  <CodeMirror
+                    value={toml}
+                    theme="dark"
+                    className="IDEScreen_maincontainer_innercontainer_codecontainer_codearea"
+                    extensions={[langs.toml()]}
+                    onChange={onChangeToml}
+                  />{" "}
+                </div>
+              )}
               {funcState === "about" && (
                 <div className="IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_aboutcontainer">
                   <ReactMarkdown escapeHtml={false}>{about}</ReactMarkdown>
