@@ -59,13 +59,13 @@
           }
           @media only screen and (max-width: 1700px) {
             .IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_aboutcontainer,
-            .IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_functioncontainer{
+            .IDEScreen_maincontainer_sidebar_outercontainer_topcontainer_functioncontainer {
               height: 27vh;
             }
           }
           &_aboutcontainer {
             background-color: #1c1b1f;
-            @apply px-4 py-4 text-xs prose prose-invert;
+            @apply px-4 py-4 text-xs flex flex-col;
             height: 36vh;
             color: white !important;
             overflow: auto;
@@ -249,17 +249,17 @@
         height: 100%;
         overflow: auto;
         position: relative;
-        &_formatbutton{
-                            @apply flex justify-center items-center px-2 py-3 text-xs cursor-pointer;
-                // width: 50%;
-                background: #d0bcff;
-                box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-                border-radius: 8px;
-                color: #381e72;
-                position: absolute;
-                bottom: 10px;
-                right: 10px;
-                z-index: 20;
+        &_formatbutton {
+          @apply flex justify-center items-center px-2 py-3 text-xs cursor-pointer;
+          // width: 50%;
+          background: #d0bcff;
+          box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+          border-radius: 8px;
+          color: #381e72;
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+          z-index: 20;
         }
         &_codearea {
           height: 100%;
