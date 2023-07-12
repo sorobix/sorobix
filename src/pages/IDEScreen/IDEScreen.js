@@ -214,7 +214,7 @@ impl Contract {
     setShowLoading(false);
     if (res.status === 200) {
       showSuccessSnack("Code Formatted!!!", toastId.current);
-      const decodedCode = atob(res.data.formatted_code);
+      const decodedCode = atob(res.data);
       setCode(decodedCode);
     } else {
       if (res?.status === 406) {
