@@ -96,7 +96,7 @@ Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. Howe
 
   const formatterWS = useWebSocket(socketUrl, {});
   const compilerWS = useWebSocket(
-    "wss://backend.sorobix.xyz/handler/ws/compile",
+    "wss://backend.sorobix.xyz/ws/compile",
     {}
   );
   const [toml, setToml] = useState(defaultCargoToml);
@@ -207,14 +207,14 @@ impl Contract {
     setShowLoading(true);
     const encodedCode = btoa(code);
     const data = {
-      data: encodedCode,
+      code: encodedCode,
     };
     const res = await api.formatCode(data);
     // console.log(res);
     setShowLoading(false);
     if (res.status === 200) {
       showSuccessSnack("Code Formatted!!!", toastId.current);
-      const decodedCode = atob(res.data);
+      const decodedCode = atob(res.data.formatted_code);
       setCode(decodedCode);
     } else {
       if (res?.status === 406) {

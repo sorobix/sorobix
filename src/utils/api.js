@@ -25,7 +25,7 @@ export default class Api {
     try {
       const resp = await Axios({
         method: "post",
-        url: this.backendURL + `/handler/format`,
+        url: this.backendURL + `/formatter`,
         data,
       });
       console.log(resp);
