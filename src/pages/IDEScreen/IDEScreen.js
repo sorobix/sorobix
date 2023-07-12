@@ -95,7 +95,10 @@ Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. Howe
   const [compileHistory, setCompileHistory] = useState([]);
 
   const formatterWS = useWebSocket(socketUrl, {});
-  const compilerWS = useWebSocket("wss://backend.sorobix.xyz/handler/ws/compile", {});
+  const compilerWS = useWebSocket(
+    "wss://backend.sorobix.xyz/handler/ws/compile",
+    {}
+  );
   const [toml, setToml] = useState(defaultCargoToml);
   const [code, setCode] = useState(`#![no_std]
 use soroban_sdk::{contractimpl, vec, Env, Symbol, Vec};
@@ -199,26 +202,26 @@ impl Contract {
   //   const encodedCode = btoa(code);
   //   formatterWS.sendMessage(encodedCode);
   // };
-    const tryFormat = async () => {
-      toastId.current = toast.loading("Formatting code...");
-      setShowLoading(true);
-      const encodedCode = btoa(code);
-      const data = {
-      "data": encodedCode,
-      };
-      const res = await api.formatCode(data);
-      // console.log(res);
-      setShowLoading(false);
-      if (res.status === 200) {
-        showSuccessSnack("Code Formatted!!!", toastId.current);
-        const decodedCode = atob(res.data.formatted_code);
-        setCode(decodedCode);
-      } else {
-        if (res?.status === 406) {
-          showErrorSnack("Syntax Error!", toastId.current);
-        } else showErrorSnack("Something went wrong!", toastId.current);
-      }
+  const tryFormat = async () => {
+    toastId.current = toast.loading("Formatting code...");
+    setShowLoading(true);
+    const encodedCode = btoa(code);
+    const data = {
+      data: encodedCode,
     };
+    const res = await api.formatCode(data);
+    // console.log(res);
+    setShowLoading(false);
+    if (res.status === 200) {
+      showSuccessSnack("Code Formatted!!!", toastId.current);
+      const decodedCode = atob(res.data.formatted_code);
+      setCode(decodedCode);
+    } else {
+      if (res?.status === 406) {
+        showErrorSnack("Syntax Error!", toastId.current);
+      } else showErrorSnack("Something went wrong!", toastId.current);
+    }
+  };
 
   const onGenerate = async () => {
     setShowLoading(true);
@@ -263,8 +266,6 @@ impl Contract {
   const tryDeploy = async () => {
     toastId.current = toast.loading("Deploying Contract...");
     setShowLoading(true);
-
-    setCompileSuccess(false);
     setOutput("");
     const data = { lib_file: compileKey, secret_key: GSKeys[accountID].S };
     const res = await api.deployContract(data);
