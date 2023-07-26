@@ -34,10 +34,10 @@ crate-type = ["cdylib"]
 testutils = ["soroban-sdk/testutils"]
 
 [dependencies]
-soroban-sdk = "0.8.4"
+soroban-sdk = "0.9.2"
 
 [dev_dependencies]
-soroban-sdk = { version = "0.8.4", features = ["testutils"] }
+soroban-sdk = { version = "0.9.2", features = ["testutils"] }
 
 [profile.release]
 opt-level = "z"
@@ -101,12 +101,15 @@ Inorder to deploy or invoke contracts, you will need G/S keys, or a wallet. Howe
   );
   const [toml, setToml] = useState(defaultCargoToml);
   const [code, setCode] = useState(`#![no_std]
-use soroban_sdk::{contractimpl, vec, Env, Symbol, Vec};
+use soroban_sdk::{contract, contractimpl, symbol_short, vec, Env, Symbol, Vec};
+
+#[contract]
 pub struct Contract;
+
 #[contractimpl]
 impl Contract {
     pub fn hello(env: Env, to: Symbol) -> Vec<Symbol> {
-        vec![&env, Symbol::short("Hello"), to]
+        vec![&env, symbol_short!("Hello"), to]
     }
 }`);
   const onChange = React.useCallback((value, viewUpdate) => {
